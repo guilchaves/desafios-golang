@@ -12,7 +12,6 @@ var (
 	ErrCodeIsRequired      = errors.New("code is required")
 	ErrBaseValueIsRequired = errors.New("base value is required")
 	ErrBaseValueIsInvalid  = errors.New("base value is invalid")
-	ErrDiscountIsRequired  = errors.New("discount is required")
 	ErrDiscountIsIsInvalid = errors.New("discount is invalid")
 )
 
@@ -40,9 +39,6 @@ func (o *Order) Validate() error {
 	}
 	if o.BaseValue < 0 {
 		return ErrBaseValueIsInvalid
-	}
-	if o.Discount == 0 {
-		return ErrDiscountIsRequired
 	}
 	if o.Discount < 0 {
 		return ErrDiscountIsIsInvalid
