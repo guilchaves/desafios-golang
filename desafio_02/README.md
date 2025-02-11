@@ -4,7 +4,7 @@
 
 
 ### Desafio
-Você deve criar um projeto ~~Spring Boot com Java e banco de dados H2~~ Go e banco de dados, e implementar o modelo
+Você deve criar um projeto ~~Spring Boot com Java e banco de dados H2~~ Go com banco de dados, e implementar o modelo
 conceitual conforme especificação a seguir. Além disso, você deve fazer o seeding da base de dados
 conforme diagrama de objetos que segue.</br>
 
@@ -16,3 +16,4 @@ blocos de horários (por exemplo: um curso de HTML pode ocorrer em dois blocos, 
 armazenar o dia e os horários de início de fim do bloco daquele dia). Para cada participante, deseja-se
 cadastrar seu nome e email.</br>
 
+![entities](./entities.jpg)
