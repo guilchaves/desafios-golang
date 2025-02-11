@@ -40,8 +40,8 @@ func main() {
 	}
 
 	shippingService := service.NewShippingService(*order)
-    os := service.NewOrderService(*order, shippingService)
-    orderTotal := os.CalculateTotal()
-    fmt.Printf("Order code: %d\n", order.Code)
-    fmt.Printf("Order total: R$ %.2f\n", orderTotal)
+	os := service.NewOrderService(*order, shippingService)
+	orderTotal := os.CalculateTotal()
+	fmt.Printf("Order code: %d\n", order.Code)
+	fmt.Printf("Order total: R$ %.2f\n", orderTotal)
 }
