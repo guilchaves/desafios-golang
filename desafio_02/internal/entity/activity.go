@@ -10,6 +10,7 @@ type Activity struct {
 	CategoryID  int         `gorm:"not null"                                       json:"category_id"`
 	Category    Category    `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 	TimeBlocks  []TimeBlock `gorm:"foreignKey:ActivityID"`
+	Attendees   []Attendee  `gorm:"foreignKey:ActivityID"`
 }
 
 var (
@@ -25,6 +26,7 @@ func NewActivity(
 	price float64,
 	categoryID int,
 	timeBlocks []TimeBlock,
+	attendees []Attendee,
 ) (*Activity, error) {
 	activity := &Activity{
 		Name:        name,
@@ -32,6 +34,7 @@ func NewActivity(
 		Price:       price,
 		CategoryID:  categoryID,
 		TimeBlocks:  timeBlocks,
+		Attendees:   attendees,
 	}
 	if err := activity.Validate(); err != nil {
 		return nil, err
@@ -54,12 +57,6 @@ func (a *Activity) Validate() error {
 	}
 	if a.CategoryID == 0 {
 		return ErrActivityCategoryIsRequired
-	}
-
-	for _, block := range a.TimeBlocks {
-		if err := block.Validate(); err != nil {
-			return err
-		}
 	}
 
 	return nil

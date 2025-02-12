@@ -19,6 +19,7 @@ func TestNewTimeBlock(t *testing.T) {
 	)
 	assert.NoError(t, err)
 	assert.NotNil(t, tb)
+	assert.Equal(t, tb.ActivityID, a.ID)
 
 	tb, err = NewTimeBlock(time.Time{}, time.Now(), a.ID)
 	assert.Error(t, err)
