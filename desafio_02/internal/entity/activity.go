@@ -7,10 +7,10 @@ type Activity struct {
 	Name        string      `gorm:"not null"`
 	Description string      `gorm:"not null"`
 	Price       float64     `gorm:"not null"`
-	CategoryID  int         `gorm:"not null"                                       json:"category_id"`
+	CategoryID  int         `gorm:"not null"                                                                                                    json:"category_id"`
 	Category    Category    `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 	TimeBlocks  []TimeBlock `gorm:"foreignKey:ActivityID"`
-	Attendees   []Attendee  `gorm:"foreignKey:ActivityID"`
+	Attendees   []Attendee  `gorm:"many2many:attendee_activity;foreignKey:ID;joinForeignKey:ActivityID;References:ID;joinReferences:AttendeeID"`
 }
 
 var (
@@ -26,7 +26,6 @@ func NewActivity(
 	price float64,
 	categoryID int,
 	timeBlocks []TimeBlock,
-	attendees []Attendee,
 ) (*Activity, error) {
 	activity := &Activity{
 		Name:        name,
@@ -34,7 +33,6 @@ func NewActivity(
 		Price:       price,
 		CategoryID:  categoryID,
 		TimeBlocks:  timeBlocks,
-		Attendees:   attendees,
 	}
 	if err := activity.Validate(); err != nil {
 		return nil, err

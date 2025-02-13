@@ -9,8 +9,7 @@ type Attendee struct {
 	ID         int    `gorm:"primaryKey"`
 	Name       string `gorm:"type:string;not null"`
 	Email      string `gorm:"type:string;not null"`
-	ActivityID int
-	Activity   Activity `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	Activities []Activity `gorm:"many2many:attendee_activity;foreignKey:ID;joinForeignKey:AttendeeID;References:ID;joinReferences:ActivityID"`
 }
 
 var (
@@ -19,11 +18,10 @@ var (
 	ErrAttendeeEmailIsInvalid  = errors.New("email is invalid")
 )
 
-func NewAttendee(name, email string, activityID int) (*Attendee, error) {
+func NewAttendee(name, email string) (*Attendee, error) {
 	attendee := &Attendee{
 		Name:       name,
 		Email:      email,
-		ActivityID: activityID,
 	}
 
 	if err := attendee.Validate(); err != nil {
