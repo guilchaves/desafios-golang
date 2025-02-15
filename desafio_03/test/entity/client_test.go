@@ -4,12 +4,13 @@ import (
 	"testing"
 	"time"
 
+	"github.com/guilchaves/desafios-golang/desafio_03/internal/entity"
 	"github.com/guilchaves/desafios-golang/desafio_03/internal/validator"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestNewClient(t *testing.T) {
-	c, err := NewClient(
+	c, err := entity.NewClient(
 		"John Doe",
 		"12312312312",
 		5000.0,
@@ -19,7 +20,7 @@ func TestNewClient(t *testing.T) {
 	assert.NotNil(t, c)
 	assert.NoError(t, err)
 
-	c, err = NewClient(
+	c, err = entity.NewClient(
 		"",
 		"12312312312",
 		5000.0,
@@ -29,7 +30,7 @@ func TestNewClient(t *testing.T) {
 	assert.Nil(t, c)
 	assert.Error(t, err, validator.ErrNameIsEmpty)
 
-	c, err = NewClient(
+	c, err = entity.NewClient(
 		"John Doe",
 		"123123123",
 		5000.0,
@@ -39,7 +40,7 @@ func TestNewClient(t *testing.T) {
 	assert.Nil(t, c)
 	assert.Error(t, err, validator.ErrCpfIsInvalid)
 
-	c, err = NewClient(
+	c, err = entity.NewClient(
 		"John Doe",
 		"12312312312",
 		-5000.0,
@@ -49,7 +50,7 @@ func TestNewClient(t *testing.T) {
 	assert.Nil(t, c)
 	assert.Error(t, err, validator.ErrIncomeIsInvalid)
 
-	c, err = NewClient(
+	c, err = entity.NewClient(
 		"John Doe",
 		"12312312312",
 		5000.0,
@@ -59,7 +60,7 @@ func TestNewClient(t *testing.T) {
 	assert.Nil(t, c)
 	assert.Error(t, err, validator.ErrBirthdayIsInvalid)
 
-	c, err = NewClient(
+	c, err = entity.NewClient(
 		"John Doe",
 		"12312312312",
 		5000.0,

@@ -37,14 +37,9 @@ func (r *ClientRepository) FindAll(limit, offset int) ([]entity.Client, error) {
 }
 
 func (r *ClientRepository) Update(client *entity.Client) error {
-	_, err := r.FindByID(client.ID)
-	if err != nil {
-		return err
-	}
-	return r.db.Save(r).Error
+	return r.db.Model(&entity.Client{}).Where("id = ?", client.ID).Updates(client).Error
 }
 
 func (r *ClientRepository) Delete(id uint) error {
 	return r.db.Delete(&entity.Client{}, id).Error
 }
-

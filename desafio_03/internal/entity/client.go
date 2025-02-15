@@ -7,12 +7,12 @@ import (
 )
 
 type Client struct {
-	ID        uint `gorm:"primaryKey"`
-	Name      string
-	CPF       string
-	Income    float64
-	BirthDate time.Time
-	Children  int
+	ID        uint      `gorm:"primaryKey; autoIncrement"`
+	Name      string    `gorm:"column:name;not null"`
+	CPF       string    `gorm:"column:cpf;unique;not null"`
+	Income    float64   `gorm:"column:income;not null"`
+	BirthDate time.Time `gorm:"column:birth_date;not null"`
+	Children  int       `gorm:"column:children;not null"`
 }
 
 func NewClient(
