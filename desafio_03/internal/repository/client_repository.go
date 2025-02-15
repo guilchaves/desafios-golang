@@ -10,7 +10,7 @@ type ClientRepository struct {
 }
 
 func NewClientRepository(db *gorm.DB) *ClientRepository {
-	return &ClientRepository{db}
+	return &ClientRepository{db: db}
 }
 
 func (r *ClientRepository) Create(client *entity.Client) error {
