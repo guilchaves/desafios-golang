@@ -9,6 +9,10 @@ import (
 	"time"
 )
 
+var (
+	ErrBirthDateInvalid = errors.New("data de nascimento inválida")
+)
+
 type ClientUsecase struct {
 	clientRepo *repository.ClientRepository
 }
@@ -27,7 +31,7 @@ func (uc *ClientUsecase) Create(
 ) (*entity.Client, error) {
 	birthDate, err := time.Parse("2006-01-02", birthDateStr)
 	if err != nil {
-		return nil, errors.New("data de nascimento inválida")
+		return nil, ErrBirthDateInvalid
 	}
 
 	client, err := entity.NewClient(name, cpf, income, birthDate, children)

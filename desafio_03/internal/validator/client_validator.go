@@ -8,7 +8,7 @@ import (
 
 var (
 	ErrNameIsEmpty       = errors.New("nome não pode ser vazio")
-	ErrBirthdayIsInvalid = errors.New("data de nasicmento não pode ser futura")
+	ErrBirthdayIsFuture = errors.New("data de nasicmento não pode ser futura")
 	ErrIncomeIsInvalid   = errors.New("salário não pode ser negativo")
 	ErrCpfIsInvalid      = errors.New("CPF deve conter 11 dígitos numéricos")
 	ErrChildrenIsInvalid = errors.New("quantidade de filhos não pode ser negativa")
@@ -23,7 +23,7 @@ func ValidateClientName(name string) error {
 
 func ValidateClientBirthDate(birthDate time.Time) error {
 	if birthDate.After(time.Now()) {
-		return ErrBirthdayIsInvalid
+		return ErrBirthdayIsFuture
 	}
 	return nil
 }

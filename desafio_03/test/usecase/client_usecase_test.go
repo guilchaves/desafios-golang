@@ -24,5 +24,5 @@ func TestClientUsecase_Create(t *testing.T) {
 	client, err := clientUsecase.Create(name, cpf, income, birthDateStr, children)
 	assert.Error(t, err)
 	assert.Nil(t, client)
-	assert.Equal(t, "data de nascimento inválida", err.Error())
+	assert.Equal(t, "data de nascimento inválida", usecase.ErrBirthDateInvalid.Error())
 }

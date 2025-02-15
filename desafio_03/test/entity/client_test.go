@@ -58,7 +58,7 @@ func TestNewClient(t *testing.T) {
 		0,
 	)
 	assert.Nil(t, c)
-	assert.Error(t, err, validator.ErrBirthdayIsInvalid)
+	assert.Error(t, err, validator.ErrBirthdayIsFuture)
 
 	c, err = entity.NewClient(
 		"John Doe",
