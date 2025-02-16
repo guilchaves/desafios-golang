@@ -14,16 +14,16 @@ var (
 )
 
 type ClientUsecase struct {
-	clientRepo *repository.ClientRepository
+	clientRepo repository.ClientRepository
 }
 
-func NewClientUsecase(clientRepo *repository.ClientRepository) *ClientUsecase {
+func NewClientUsecase(clientRepo repository.ClientRepository) *ClientUsecase {
 	return &ClientUsecase{
 		clientRepo: clientRepo,
 	}
 }
 
-func (uc *ClientUsecase) Create(
+func (uc *ClientUsecase) CreateClient(
 	name, cpf string,
 	income float64,
 	birthDateStr string,
@@ -45,4 +45,20 @@ func (uc *ClientUsecase) Create(
 	}
 
 	return client, nil
+}
+
+func (uc *ClientUsecase) GetClients() ([]entity.Client, error) {
+	return uc.clientRepo.FindAll(10, 0)
+}
+
+func (uc *ClientUsecase) GetClientByID(id uint) (*entity.Client, error) {
+	return uc.clientRepo.FindByID(id)
+}
+
+func (uc *ClientUsecase) UpdateClient(client *entity.Client) error {
+	return uc.clientRepo.Update(client)
+}
+
+func (uc *ClientUsecase) DeleteClient(id uint) error {
+	return uc.clientRepo.Delete(id)
 }
