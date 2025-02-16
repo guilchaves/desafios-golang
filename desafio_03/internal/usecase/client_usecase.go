@@ -4,7 +4,7 @@ import (
 	"errors"
 
 	"github.com/guilchaves/desafios-golang/desafio_03/internal/entity"
-	"github.com/guilchaves/desafios-golang/desafio_03/internal/repository"
+	"github.com/guilchaves/desafios-golang/desafio_03/internal/infra/database"
 
 	"time"
 )
@@ -14,10 +14,10 @@ var (
 )
 
 type ClientUsecase struct {
-	clientRepo repository.ClientRepository
+	clientRepo database.ClientRepository
 }
 
-func NewClientUsecase(clientRepo repository.ClientRepository) *ClientUsecase {
+func NewClientUsecase(clientRepo database.ClientRepository) *ClientUsecase {
 	return &ClientUsecase{
 		clientRepo: clientRepo,
 	}

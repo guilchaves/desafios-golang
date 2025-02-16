@@ -1,18 +1,18 @@
-package repository
+package database
 
 import (
 	"testing"
 	"time"
 
+	"github.com/guilchaves/desafios-golang/desafio_03/internal/infra/database"
 	"github.com/guilchaves/desafios-golang/desafio_03/internal/entity"
-	"github.com/guilchaves/desafios-golang/desafio_03/internal/repository"
 	"github.com/guilchaves/desafios-golang/desafio_03/test/utils"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestClientRepository_CreateAndFindById(t *testing.T) {
 	db := utils.SetupTestDB(t)
-	repo := repository.NewClientRepository(db)
+	repo := database.NewClientRepository(db)
 
 	client := &entity.Client{
 		Name:      "John Doe",
@@ -34,7 +34,7 @@ func TestClientRepository_CreateAndFindById(t *testing.T) {
 
 func TestClientRepository_FindAll(t *testing.T) {
 	db := utils.SetupTestDB(t)
-	repo := repository.NewClientRepository(db)
+	repo := database.NewClientRepository(db)
 
 	clients := []*entity.Client{
 		{Name: "Alice", CPF: "11111111111", Income: 3000, BirthDate: time.Now(), Children: 1},
@@ -53,7 +53,7 @@ func TestClientRepository_FindAll(t *testing.T) {
 
 func TestClientRepository_Update(t *testing.T) {
 	db := utils.SetupTestDB(t)
-	repo := repository.NewClientRepository(db)
+	repo := database.NewClientRepository(db)
 
 	client := &entity.Client{
 		Name:      "Charlie",
@@ -76,7 +76,7 @@ func TestClientRepository_Update(t *testing.T) {
 
 func TestClientRepository_Delete(t *testing.T) {
 	db := utils.SetupTestDB(t)
-	repo := repository.NewClientRepository(db)
+	repo := database.NewClientRepository(db)
 
 	client := &entity.Client{
 		Name:      "Charlie",

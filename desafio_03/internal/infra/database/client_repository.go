@@ -1,4 +1,4 @@
-package repository
+package database 
 
 import (
 	"github.com/guilchaves/desafios-golang/desafio_03/internal/entity"
