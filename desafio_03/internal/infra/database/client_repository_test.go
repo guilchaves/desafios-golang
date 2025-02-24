@@ -1,36 +1,27 @@
 package database_test
 
 import (
-	"database/sql"
 	"testing"
 	"time"
 
 	"github.com/guilchaves/desafios-golang/desafio_03/internal/entity"
 	"github.com/guilchaves/desafios-golang/desafio_03/internal/infra/database"
 	"github.com/stretchr/testify/suite"
-
-	_ "github.com/mattn/go-sqlite3"
+	"gorm.io/driver/sqlite"
+	"gorm.io/gorm"
 )
 
 type ClientRepositoryTestSuite struct {
 	suite.Suite
-	Db *sql.DB
+	Db *gorm.DB
 }
 
 func (suite *ClientRepositoryTestSuite) SetupSuite() {
-	db, err := sql.Open("sqlite3", ":memory:")
+	db, err := gorm.Open(sqlite.Open("file::memory:"), &gorm.Config{})
 	suite.NoError(err)
-	db.Exec(`
-    CREATE TABLE clients (
-        id INTEGER PRIMARY KEY,
-        name TEXT NOT NULL,
-        cpf TEXT NOT NULL UNIQUE,
-        income REAL NOT NULL,
-        birthdate TEXT NOT NULL,
-        children INTEGER NOT NULL
-    )
-  `)
 	suite.Db = db
+
+	db.AutoMigrate(&entity.Client{})
 }
 
 func TestSuite(t *testing.T) {
@@ -38,15 +29,6 @@ func TestSuite(t *testing.T) {
 }
 
 func (suite *ClientRepositoryTestSuite) TestCreateClient_WhenSave_ThenShouldSaveClient() {
-	var (
-		id           uint
-		name         string
-		cpf          string
-		income       float64
-		birthDateStr string
-		children     uint
-	)
-
 	defaultBirthdate := time.Date(1990, time.January, 1, 0, 0, 0, 0, time.UTC)
 	client, err := entity.NewClient(
 		"John Doe",
@@ -55,37 +37,23 @@ func (suite *ClientRepositoryTestSuite) TestCreateClient_WhenSave_ThenShouldSave
 		defaultBirthdate,
 		2,
 	)
-
 	suite.NoError(err)
+
 	repo := database.NewClientRepository(suite.Db)
 	err = repo.Save(client)
 	suite.NoError(err)
 
-	var insertedID int64
-	err = suite.Db.QueryRow("SELECT last_insert_rowid()").Scan(&insertedID)
-	suite.NoError(err)
-	suite.NotZero(insertedID, "Should have generated an ID")
+	suite.NotZero(client.ID, "Client ID should be set after saving")
 
-	err = suite.Db.QueryRow("SELECT id, name, cpf, income, birthdate, children FROM clients WHERE id = ?", insertedID).
-		Scan(&id, &name, &cpf, &income, &birthDateStr, &children)
-	suite.NoError(err)
+	var clientResult entity.Client
+	result := suite.Db.First(&clientResult, "id = ?", client.ID)
+	suite.NoError(result.Error)
+	suite.Equal(uint(1), clientResult.ID)
 
-	birthDate, err := time.Parse("2006-01-02", birthDateStr)
-	suite.NoError(err)
-
-	clientResult := entity.Client{
-		ID:        id,
-		Name:      name,
-		Cpf:       cpf,
-		Income:    income,
-		BirthDate: birthDate,
-		Children:  children,
-	}
-
-	suite.Equal(client.ID, clientResult.ID)
 	suite.Equal(client.Name, clientResult.Name)
 	suite.Equal(client.Cpf, clientResult.Cpf)
 	suite.Equal(client.Income, clientResult.Income)
-	suite.Equal(client.BirthDate, clientResult.BirthDate)
+	suite.True(client.BirthDate.Equal(clientResult.BirthDate), "Birth dates should match")
 	suite.Equal(client.Children, clientResult.Children)
+
 }
