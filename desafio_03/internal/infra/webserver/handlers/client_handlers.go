@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/go-chi/chi/v5"
 	"github.com/guilchaves/desafios-golang/desafio_03/internal/dto"
 	"github.com/guilchaves/desafios-golang/desafio_03/internal/entity"
 	"github.com/guilchaves/desafios-golang/desafio_03/internal/infra/database"
@@ -78,4 +79,28 @@ func (h *ClientHandler) GetClients(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(clients)
+}
+
+func (h *ClientHandler) GetClientByID(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "id")
+	idInt, err := strconv.Atoi(id)
+  if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+    return
+  }
+
+	if id == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	client, err := h.ClientRepository.FindByID(idInt)
+  if err != nil {
+		w.WriteHeader(http.StatusNotFound)
+    return
+  }
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(client)
 }

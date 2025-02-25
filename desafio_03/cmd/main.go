@@ -31,8 +31,10 @@ func main() {
 
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
+	r.Use(middleware.Recoverer)
 
 	r.Get("/clients", clientHandler.GetClients)
+	r.Get("/clients/{id}", clientHandler.GetClientByID)
 	r.Post("/clients", clientHandler.CreateClient)
 
 	http.ListenAndServe(":8080", r)
