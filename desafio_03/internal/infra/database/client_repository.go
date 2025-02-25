@@ -1,6 +1,8 @@
 package database
 
 import (
+	"strings"
+
 	"gorm.io/gorm"
 
 	"github.com/guilchaves/desafios-golang/desafio_03/internal/entity"
@@ -23,6 +25,31 @@ func (r *ClientRepository) FindByID(id int) (*entity.Client, error) {
 	err := r.Db.First(&client, "id = ?", id).Error
 
 	return &client, err
+}
+
+func (r *ClientRepository) FindAll(page, limit int, sort string) ([]entity.Client, error) {
+	var clients []entity.Client
+
+	sort = strings.ToLower(sort)
+	if sort != "asc" && sort != "desc" {
+		sort = "asc"
+	}
+
+	if page <= 0 {
+		page = 1
+	}
+
+	if limit <= 0 {
+		limit = 10
+	}
+
+	query := r.Db.Order("id " + sort)
+	if page > 0 && limit > 0 {
+		query = query.Limit(limit).Offset((page -1) * limit)
+	}
+
+	err := query.Find(&clients).Error
+	return clients, err
 }
 
 func (r *ClientRepository) Update(client *entity.Client) error {
