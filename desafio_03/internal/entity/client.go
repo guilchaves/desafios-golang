@@ -1,51 +1,36 @@
 package entity
 
 import (
+	"errors"
 	"time"
-
-	"github.com/guilchaves/desafios-golang/desafio_03/internal/validator"
 )
 
 type Client struct {
-	ID        uint      `gorm:"primaryKey; autoIncrement"`
-	Name      string    `gorm:"column:name;not null"`
-	CPF       string    `gorm:"column:cpf;unique;not null"`
-	Income    float64   `gorm:"column:income;not null"`
-	BirthDate time.Time `gorm:"column:birth_date;not null"`
-	Children  int       `gorm:"column:children;not null"`
+	ID        int      `json:"id"`
+	Name      string    `json:"name"`
+	Cpf       string    `json:"cpf"`
+	Income    float64   `json:"income"`
+	BirthDate time.Time `json:"birthDate"`
+	Children  uint      `json:"children"`
 }
 
 func NewClient(
 	name, cpf string,
 	income float64,
-	birthDate time.Time,
-	children int,
+	birthdate time.Time,
+	children uint,
 ) (*Client, error) {
-	if err := validator.ValidateClientName(name); err != nil {
-		return nil, err
+	if name == "" {
+		return nil, errors.New("name cannot be empty")
 	}
-
-	if err := validator.ValidateCPF(cpf); err != nil {
-		return nil, err
+	if birthdate.After(time.Now()) {
+		return nil, errors.New("birthdate cannot be in the future")
 	}
-
-	if err := validator.ValidateIncome(income); err != nil {
-		return nil, err
-	}
-
-	if err := validator.ValidateClientBirthDate(birthDate); err != nil {
-		return nil, err
-	}
-
-	if err := validator.ValidateChildren(children); err != nil {
-		return nil, err
-	}
-
 	return &Client{
 		Name:      name,
-		CPF:       cpf,
+		Cpf:       cpf,
 		Income:    income,
-		BirthDate: birthDate,
+		BirthDate: birthdate,
 		Children:  children,
 	}, nil
 }

@@ -1,47 +1,43 @@
-package database 
+package database
 
 import (
-	"github.com/guilchaves/desafios-golang/desafio_03/internal/entity"
 	"gorm.io/gorm"
+
+	"github.com/guilchaves/desafios-golang/desafio_03/internal/entity"
 )
 
-type ClientRepositoryImpl struct {
-	db *gorm.DB
+type ClientRepository struct {
+	Db *gorm.DB
 }
 
-var _ ClientRepository = &ClientRepositoryImpl{}
-
-func NewClientRepository(db *gorm.DB) *ClientRepositoryImpl {
-	return &ClientRepositoryImpl{db: db}
+func NewClientRepository(db *gorm.DB) *ClientRepository {
+	return &ClientRepository{Db: db}
 }
 
-func (r *ClientRepositoryImpl) Create(client *entity.Client) error {
-	return r.db.Create(client).Error
+func (r *ClientRepository) Save(client *entity.Client) error {
+	return r.Db.Create(client).Error
 }
 
-func (r *ClientRepositoryImpl) FindByID(id uint) (*entity.Client, error) {
+func (r *ClientRepository) FindByID(id int) (*entity.Client, error) {
 	var client entity.Client
-	err := r.db.First(&client, id).Error
+	err := r.Db.First(&client, "id = ?", id).Error
+
+	return &client, err
+}
+
+func (r *ClientRepository) Update(client *entity.Client) error {
+	_, err := r.FindByID(client.ID)
 	if err != nil {
-		return nil, err
+		return err
+	}
+	return r.Db.Save(client).Error
+}
+
+func (r *ClientRepository) Delete(id int) error {
+	client, err := r.FindByID(id)
+	if err != nil {
+		return err
 	}
 
-	return &client, nil
-}
-
-func (r *ClientRepositoryImpl) FindAll(limit, offset int) ([]entity.Client, error) {
-	var clients []entity.Client
-	err := r.db.Limit(limit).Offset(offset).Find(&clients).Error
-	if err != nil {
-		return nil, err
-	}
-	return clients, nil
-}
-
-func (r *ClientRepositoryImpl) Update(client *entity.Client) error {
-	return r.db.Model(&entity.Client{}).Where("id = ?", client.ID).Updates(client).Error
-}
-
-func (r *ClientRepositoryImpl) Delete(id uint) error {
-	return r.db.Delete(&entity.Client{}, id).Error
+	return r.Db.Delete(client).Error
 }
