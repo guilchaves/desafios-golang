@@ -95,11 +95,6 @@ func (h *ClientHandler) GetClientByID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if id == "" {
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
 	client, err := h.ClientRepository.FindByID(idInt)
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
@@ -110,7 +105,6 @@ func (h *ClientHandler) GetClientByID(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(client)
 }
-
 func (h *ClientHandler) UpdateClient(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	if id == "" {
@@ -142,7 +136,6 @@ func (h *ClientHandler) UpdateClient(w http.ResponseWriter, r *http.Request) {
 	_, err = h.ClientRepository.FindByID(idInt)
 	if err != nil {
 		log.Print(err)
-		log.Print("🦆 quack quack!")
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
@@ -159,7 +152,6 @@ func (h *ClientHandler) UpdateClient(w http.ResponseWriter, r *http.Request) {
 	err = h.ClientRepository.Update(&clientInput)
 	if err != nil {
 		log.Print(err)
-		log.Print("🦆🦆 quack quack!")
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
@@ -168,16 +160,16 @@ func (h *ClientHandler) UpdateClient(w http.ResponseWriter, r *http.Request) {
 
 func (h *ClientHandler) DeleteProduct(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
-	if id == ""{
+	if id == "" {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	
+
 	idInt, err := strconv.Atoi(id)
-  if err != nil {
+	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-    return
-  }
+		return
+	}
 
 	_, err = h.ClientRepository.FindByID(idInt)
 	if err != nil {
