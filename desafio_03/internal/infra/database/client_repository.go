@@ -26,7 +26,6 @@ func (r *ClientRepository) FindByID(id int) (*entity.Client, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	return &client, err
 }
 
