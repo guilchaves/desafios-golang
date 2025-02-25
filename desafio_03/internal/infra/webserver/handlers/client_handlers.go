@@ -3,6 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"log"
+	"log/slog"
 	"net/http"
 	"strconv"
 	"time"
@@ -11,7 +12,26 @@ import (
 	"github.com/guilchaves/desafios-golang/desafio_03/internal/dto"
 	"github.com/guilchaves/desafios-golang/desafio_03/internal/entity"
 	"github.com/guilchaves/desafios-golang/desafio_03/internal/infra/database"
+	"github.com/guilchaves/desafios-golang/desafio_03/internal/infra/webserver/response"
 )
+
+func sendJSON(w http.ResponseWriter, resp response.Response, status int) {
+	data, err := json.Marshal(resp)
+	if err != nil {
+		slog.Error("error during json marshal", "error", err)
+		sendJSON(
+			w,
+			response.Response{Error: "something went wrong"},
+			http.StatusInternalServerError,
+		)
+		return
+	}
+
+	w.WriteHeader(status)
+	if _, err := w.Write(data); err != nil {
+		slog.Error("error sending response", "error", err)
+	}
+}
 
 type ClientHandler struct {
 	ClientRepository database.ClientRepository
@@ -27,13 +47,17 @@ func (h *ClientHandler) CreateClient(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&client)
 	if err != nil {
 		log.Print(err)
-		w.WriteHeader(http.StatusBadRequest)
+		sendJSON(w, response.Response{Error: err.Error()}, http.StatusBadRequest)
 		return
 	}
 
 	birthDate, err := time.Parse("2006-01-02", client.BirthDate)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
+		sendJSON(
+			w,
+			*response.ErrorResponse(http.StatusUnprocessableEntity, err.Error()),
+			http.StatusUnprocessableEntity,
+		)
 		return
 	}
 
@@ -46,16 +70,25 @@ func (h *ClientHandler) CreateClient(w http.ResponseWriter, r *http.Request) {
 	)
 	if err != nil {
 		log.Print(err)
-		w.WriteHeader(http.StatusInternalServerError)
+		sendJSON(
+			w,
+			*response.ErrorResponse(http.StatusUnprocessableEntity, err.Error()),
+			http.StatusUnprocessableEntity,
+		)
 		return
 	}
 
 	err = h.ClientRepository.Save(clientInput)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
+		sendJSON(
+			w,
+			*response.ErrorResponse(http.StatusInternalServerError, err.Error()),
+			http.StatusInternalServerError,
+		)
 		return
 	}
-	w.WriteHeader(http.StatusCreated)
+
+	w.WriteHeader(http.StatusOK)
 }
 
 func (h *ClientHandler) GetClients(w http.ResponseWriter, r *http.Request) {
@@ -74,10 +107,15 @@ func (h *ClientHandler) GetClients(w http.ResponseWriter, r *http.Request) {
 
 	clients, err := h.ClientRepository.FindAll(pageInt, limitInt, sort)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
+		sendJSON(
+			w,
+			*response.ErrorResponse(http.StatusInternalServerError, err.Error()),
+			http.StatusInternalServerError,
+		)
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")
+
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(clients)
 }
@@ -85,19 +123,31 @@ func (h *ClientHandler) GetClients(w http.ResponseWriter, r *http.Request) {
 func (h *ClientHandler) GetClientByID(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	if id == "" {
-		w.WriteHeader(http.StatusBadRequest)
+		sendJSON(
+			w,
+			*response.ErrorResponse(http.StatusBadRequest, ""),
+			http.StatusBadRequest,
+		)
 		return
 	}
 
 	idInt, err := strconv.Atoi(id)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
+		sendJSON(
+			w,
+			*response.ErrorResponse(http.StatusInternalServerError, err.Error()),
+			http.StatusInternalServerError,
+		)
 		return
 	}
 
 	client, err := h.ClientRepository.FindByID(idInt)
 	if err != nil {
-		w.WriteHeader(http.StatusNotFound)
+		sendJSON(
+			w,
+			*response.ErrorResponse(http.StatusNotFound, err.Error()),
+			http.StatusNotFound,
+		)
 		return
 	}
 
@@ -105,17 +155,25 @@ func (h *ClientHandler) GetClientByID(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(client)
 }
+
 func (h *ClientHandler) UpdateClient(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	if id == "" {
-		w.WriteHeader(http.StatusBadRequest)
+		sendJSON(
+			w,
+			*response.ErrorResponse(http.StatusBadRequest, ""),
+			http.StatusBadRequest,
+		)
 		return
 	}
 
 	idInt, err := strconv.Atoi(id)
 	if err != nil {
-		log.Print(err)
-		w.WriteHeader(http.StatusInternalServerError)
+		sendJSON(
+			w,
+			*response.ErrorResponse(http.StatusInternalServerError, err.Error()),
+			http.StatusInternalServerError,
+		)
 		return
 	}
 
@@ -123,20 +181,32 @@ func (h *ClientHandler) UpdateClient(w http.ResponseWriter, r *http.Request) {
 	err = json.NewDecoder(r.Body).Decode(&client)
 	if err != nil {
 		log.Print(err)
-		w.WriteHeader(http.StatusBadRequest)
+		sendJSON(
+			w,
+			*response.ErrorResponse(http.StatusBadRequest, err.Error()),
+			http.StatusBadRequest,
+		)
 		return
 	}
 
 	birthDate, err := time.Parse("2006-01-02", client.BirthDate)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
+		sendJSON(
+			w,
+			*response.ErrorResponse(http.StatusBadRequest, err.Error()),
+			http.StatusBadRequest,
+		)
 		return
 	}
 
 	_, err = h.ClientRepository.FindByID(idInt)
 	if err != nil {
 		log.Print(err)
-		w.WriteHeader(http.StatusNotFound)
+		sendJSON(
+			w,
+			*response.ErrorResponse(http.StatusNotFound, err.Error()),
+			http.StatusNotFound,
+		)
 		return
 	}
 
@@ -152,34 +222,57 @@ func (h *ClientHandler) UpdateClient(w http.ResponseWriter, r *http.Request) {
 	err = h.ClientRepository.Update(&clientInput)
 	if err != nil {
 		log.Print(err)
-		w.WriteHeader(http.StatusNotFound)
+		sendJSON(
+			w,
+			*response.ErrorResponse(http.StatusNotFound, err.Error()),
+			http.StatusNotFound,
+		)
 		return
 	}
+
 	w.WriteHeader(http.StatusOK)
 }
 
 func (h *ClientHandler) DeleteProduct(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	if id == "" {
-		w.WriteHeader(http.StatusBadRequest)
+		sendJSON(
+			w,
+			*response.ErrorResponse(http.StatusBadRequest, ""),
+			http.StatusBadRequest,
+		)
 		return
 	}
 
 	idInt, err := strconv.Atoi(id)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
+		sendJSON(
+			w,
+			*response.ErrorResponse(http.StatusInternalServerError, err.Error()),
+			http.StatusInternalServerError,
+		)
+
 		return
 	}
 
 	_, err = h.ClientRepository.FindByID(idInt)
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
+		sendJSON(
+			w,
+			*response.ErrorResponse(http.StatusNotFound, err.Error()),
+			http.StatusNotFound,
+		)
 		return
 	}
 
 	err = h.ClientRepository.Delete(idInt)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
+		sendJSON(
+			w,
+			*response.ErrorResponse(http.StatusInternalServerError, err.Error()),
+			http.StatusInternalServerError,
+		)
 		return
 	}
 
