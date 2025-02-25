@@ -32,6 +32,7 @@ func main() {
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 
+	r.Get("/clients", clientHandler.GetClients)
 	r.Post("/clients", clientHandler.CreateClient)
 
 	http.ListenAndServe(":8080", r)
