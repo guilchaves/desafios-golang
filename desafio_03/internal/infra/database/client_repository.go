@@ -23,12 +23,14 @@ func (r *ClientRepository) Save(client *entity.Client) error {
 func (r *ClientRepository) FindByID(id int) (*entity.Client, error) {
 	var client entity.Client
 	err := r.Db.First(&client, "id = ?", id).Error
-
+	if err != nil {
+		return nil, err
+	}
 	return &client, err
 }
 
-func (r *ClientRepository) FindAll(page, limit int, sort string) ([]entity.Client, error) {
-	var clients []entity.Client
+func (r *ClientRepository) FindAll(page, limit int, sort string) ([]*entity.Client, error) {
+	var clients []*entity.Client
 
 	sort = strings.ToLower(sort)
 	if sort != "asc" && sort != "desc" {
@@ -53,18 +55,18 @@ func (r *ClientRepository) FindAll(page, limit int, sort string) ([]entity.Clien
 }
 
 func (r *ClientRepository) Update(client *entity.Client) error {
-	_, err := r.FindByID(client.ID)
-	if err != nil {
-		return err
+	result := r.Db.Model(&entity.Client{}).Where("id = ?", client.ID).Updates(client)
+	if result.RowsAffected == 0 {
+		return gorm.ErrRecordNotFound
 	}
-	return r.Db.Save(client).Error
+	return result.Error
+
 }
 
 func (r *ClientRepository) Delete(id int) error {
-	client, err := r.FindByID(id)
-	if err != nil {
-		return err
+	result := r.Db.Delete(&entity.Client{}, id)
+	if result.RowsAffected == 0 {
+		return gorm.ErrRecordNotFound
 	}
-
-	return r.Db.Delete(client).Error
+	return result.Error
 }
