@@ -45,5 +45,4 @@ func TestNewClient(t *testing.T) {
 		assert.Nil(t, client)
 		assert.Equal(t, "birthdate cannot be in the future", err.Error())
 	})
-
 }

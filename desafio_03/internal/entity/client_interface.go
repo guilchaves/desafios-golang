@@ -1,5 +1,7 @@
 package entity
 
 type ClientRepositoryInterface interface {
-	Save(client *Client) error
+	Save(entity *Client) error
+	FindByID(id uint) (*Client, error)
+	Update(entity *Client) error
 }
