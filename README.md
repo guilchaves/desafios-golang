@@ -13,5 +13,5 @@ Os desafios originais do treinamento Java Spring estão nesses repositórios:<br
 
 - [x] Desafio 01: [Componentes e Injeção de Dependência](https://github.com/guilchaves/desafios-golang/tree/main/desafio_01)<br/>
 - [x] Desafio 02: [Modelo de domínio e ORM](https://github.com/guilchaves/desafios-golang/tree/main/desafio_02)<br/>
-- [ ] Desafio 03: CRUD de clientes <br/>
+- [x] Desafio 03: [CRUD de clientes](https://github.com/guilchaves/desafios-golang/tree/main/desafio_03) <br/>
 - [ ] Desafio 04: Consulta de vendas<br/>
