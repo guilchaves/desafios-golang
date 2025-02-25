@@ -1,7 +1,6 @@
 package database
 
 import (
-
 	"gorm.io/gorm"
 
 	"github.com/guilchaves/desafios-golang/desafio_03/internal/entity"
@@ -19,7 +18,7 @@ func (r *ClientRepository) Save(client *entity.Client) error {
 	return r.Db.Create(client).Error
 }
 
-func (r *ClientRepository) FindByID(id int) (*entity.Client, error){
+func (r *ClientRepository) FindByID(id int) (*entity.Client, error) {
 	var client entity.Client
 	err := r.Db.First(&client, "id = ?", id).Error
 
@@ -32,4 +31,13 @@ func (r *ClientRepository) Update(client *entity.Client) error {
 		return err
 	}
 	return r.Db.Save(client).Error
+}
+
+func (r *ClientRepository) Delete(id int) error {
+	client, err := r.FindByID(id)
+	if err != nil {
+		return err
+	}
+
+	return r.Db.Delete(client).Error
 }

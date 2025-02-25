@@ -123,7 +123,7 @@ func (suite *ClientRepositoryTestSuite) TestUpdateClient_WhenClientExists_ThenSh
 }
 
 func (suite *ClientRepositoryTestSuite) TestUpdateClient_WhenClientNotExists_ThenShouldReturnError() {
-defaultBirthdate := time.Date(1990, time.January, 1, 0, 0, 0, 0, time.UTC)
+	defaultBirthdate := time.Date(1990, time.January, 1, 0, 0, 0, 0, time.UTC)
 	client, err := entity.NewClient(
 		"John Doe",
 		"12345678901",
@@ -137,5 +137,35 @@ defaultBirthdate := time.Date(1990, time.January, 1, 0, 0, 0, 0, time.UTC)
 	client.Name = "John Updated"
 	client.Cpf = "01987654321"
 	err = repo.Update(client)
+	suite.Error(err)
+}
+
+func (suite *ClientRepositoryTestSuite) TestDeleteClient_WhenClientExists_ThenShouldDeleteClient() {
+	defaultBirthdate := time.Date(1990, time.January, 1, 0, 0, 0, 0, time.UTC)
+	client, err := entity.NewClient(
+		"John Doe",
+		"12345678901",
+		5000.0,
+		defaultBirthdate,
+		2,
+	)
+	suite.NoError(err)
+
+	repo := database.NewClientRepository(suite.Db)
+	err = repo.Save(client)
+	suite.NoError(err)
+
+	foundClient, err := repo.FindByID(client.ID)
+	suite.NoError(err)
+
+	err = repo.Delete(foundClient.ID)
+	suite.NoError(err)
+}
+
+func (suite *ClientRepositoryTestSuite) TestDeleteClient_WhenClientNotExists_ThenShouldReturnError() {
+	id := 999
+
+	repo := database.NewClientRepository(suite.Db)
+	err := repo.Delete(id)
 	suite.Error(err)
 }
