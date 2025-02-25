@@ -3,6 +3,7 @@ module github.com/guilchaves/desafios-golang/desafio_03
 go 1.24.0
 
 require (
+	github.com/go-chi/chi/v5 v5.2.1
 	github.com/spf13/viper v1.19.0
 	github.com/stretchr/testify v1.9.0
 	gorm.io/driver/sqlite v1.5.7
