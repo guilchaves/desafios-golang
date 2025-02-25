@@ -1,6 +1,8 @@
 package database_test
 
 import (
+	"fmt"
+	"math/rand"
 	"testing"
 	"time"
 
@@ -17,15 +19,40 @@ type ClientRepositoryTestSuite struct {
 }
 
 func (suite *ClientRepositoryTestSuite) SetupSuite() {
-	db, err := gorm.Open(sqlite.Open("file::memory:"), &gorm.Config{})
+	db, err := gorm.Open(sqlite.Open("file::memory:?cache=shared"), &gorm.Config{})
 	suite.NoError(err)
 	suite.Db = db
 
 	db.AutoMigrate(&entity.Client{})
+	suite.NoError(err)
+}
+
+func (suite *ClientRepositoryTestSuite) SetupTest() {
+	suite.Db.Exec("DELETE FROM clients")
 }
 
 func TestSuite(t *testing.T) {
 	suite.Run(t, new(ClientRepositoryTestSuite))
+}
+
+func createTestClients(db *gorm.DB, count int) error {
+	defaultBirthdate := time.Date(1990, time.January, 1, 0, 0, 0, 0, time.UTC)
+	clients := make([]entity.Client, 0, count)
+
+	for i := 1; i <= count; i++ {
+		client, err := entity.NewClient(
+			fmt.Sprintf("Client %d", i),
+			fmt.Sprintf("%011d", i),
+			rand.Float64()*10000.0,
+			defaultBirthdate.AddDate(0, 0, i),
+			uint(rand.Intn(5)),
+		)
+		if err != nil {
+			return err
+		}
+		clients = append(clients, *client)
+	}
+	return db.Create(&clients).Error
 }
 
 func (suite *ClientRepositoryTestSuite) TestCreateClient_WhenSave_ThenShouldSaveClient() {
@@ -97,6 +124,30 @@ func (suite *ClientRepositoryTestSuite) TestFindByID_WhenClientNotExists_ThenSho
 	suite.Equal(gorm.ErrRecordNotFound, err,
 		"Expected record not found error, got %v", err,
 	)
+}
+
+func (suite *ClientRepositoryTestSuite) TestFindAll_WhenClientsExists_ThenShouldReturnClients() {
+	err := createTestClients(suite.Db, 23)
+	suite.NoError(err)
+	repo := database.NewClientRepository(suite.Db)
+
+	clients, err := repo.FindAll(1, 10, "asc")
+	suite.NoError(err)
+	suite.Len(clients, 10)
+	suite.Equal("Client 1", clients[0].Name)
+	suite.Equal("Client 10", clients[9].Name)
+
+	clients, err = repo.FindAll(2, 10, "asc")
+	suite.NoError(err)
+	suite.Len(clients, 10)
+	suite.Equal("Client 11", clients[0].Name)
+	suite.Equal("Client 20", clients[9].Name)
+
+	clients, err = repo.FindAll(3, 10, "asc")
+	suite.NoError(err)
+	suite.Len(clients, 3)
+	suite.Equal("Client 21", clients[0].Name)
+	suite.Equal("Client 23", clients[2].Name)
 }
 
 func (suite *ClientRepositoryTestSuite) TestUpdateClient_WhenClientExists_ThenShouldSaveClient() {
