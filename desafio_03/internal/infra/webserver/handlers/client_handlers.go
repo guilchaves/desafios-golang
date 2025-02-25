@@ -45,6 +45,7 @@ func (h *ClientHandler) CreateClient(w http.ResponseWriter, r *http.Request) {
 		client.Children,
 	)
 	if err != nil {
+		log.Print(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -72,10 +73,10 @@ func (h *ClientHandler) GetClients(w http.ResponseWriter, r *http.Request) {
 	sort := r.URL.Query().Get("sort")
 
 	clients, err := h.ClientRepository.FindAll(pageInt, limitInt, sort)
-  if err != nil {
+	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-    return
-  }
+		return
+	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(clients)
@@ -83,11 +84,16 @@ func (h *ClientHandler) GetClients(w http.ResponseWriter, r *http.Request) {
 
 func (h *ClientHandler) GetClientByID(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
+	if id == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
 	idInt, err := strconv.Atoi(id)
-  if err != nil {
+	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-    return
-  }
+		return
+	}
 
 	if id == "" {
 		w.WriteHeader(http.StatusBadRequest)
@@ -95,12 +101,95 @@ func (h *ClientHandler) GetClientByID(w http.ResponseWriter, r *http.Request) {
 	}
 
 	client, err := h.ClientRepository.FindByID(idInt)
-  if err != nil {
+	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
-    return
-  }
+		return
+	}
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(client)
+}
+
+func (h *ClientHandler) UpdateClient(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "id")
+	if id == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	idInt, err := strconv.Atoi(id)
+	if err != nil {
+		log.Print(err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	var client dto.UpdateClientInputDTO
+	err = json.NewDecoder(r.Body).Decode(&client)
+	if err != nil {
+		log.Print(err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	birthDate, err := time.Parse("2006-01-02", client.BirthDate)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	_, err = h.ClientRepository.FindByID(idInt)
+	if err != nil {
+		log.Print(err)
+		log.Print("🦆 quack quack!")
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+
+	clientInput := entity.Client{
+		ID:        idInt,
+		Name:      client.Name,
+		Cpf:       client.Cpf,
+		Income:    client.Income,
+		BirthDate: birthDate,
+		Children:  client.Children,
+	}
+
+	err = h.ClientRepository.Update(&clientInput)
+	if err != nil {
+		log.Print(err)
+		log.Print("🦆🦆 quack quack!")
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+}
+
+func (h *ClientHandler) DeleteProduct(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "id")
+	if id == ""{
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	
+	idInt, err := strconv.Atoi(id)
+  if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+    return
+  }
+
+	_, err = h.ClientRepository.FindByID(idInt)
+	if err != nil {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+
+	err = h.ClientRepository.Delete(idInt)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
 }

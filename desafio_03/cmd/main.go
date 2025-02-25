@@ -36,6 +36,8 @@ func main() {
 	r.Get("/clients", clientHandler.GetClients)
 	r.Get("/clients/{id}", clientHandler.GetClientByID)
 	r.Post("/clients", clientHandler.CreateClient)
+	r.Put("/clients/{id}", clientHandler.UpdateClient)
+	r.Delete("/clients/{id}", clientHandler.DeleteProduct)
 
 	http.ListenAndServe(":8080", r)
 }
