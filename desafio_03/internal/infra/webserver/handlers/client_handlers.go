@@ -14,24 +14,6 @@ import (
 	"github.com/guilchaves/desafios-golang/desafio_03/internal/infra/webserver/response"
 )
 
-func sendJSON(w http.ResponseWriter, resp response.Response, status int) {
-	data, err := json.Marshal(resp)
-	if err != nil {
-		slog.Error("error during json marshal", "error", err)
-		sendJSON(
-			w,
-			response.Response{Error: "something went wrong"},
-			http.StatusInternalServerError,
-		)
-		return
-	}
-
-	w.WriteHeader(status)
-	if _, err := w.Write(data); err != nil {
-		slog.Error("error sending response", "error", err)
-	}
-}
-
 type ClientHandler struct {
 	ClientRepository database.ClientRepository
 }
@@ -46,13 +28,13 @@ func (h *ClientHandler) CreateClient(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&client)
 	if err != nil {
 		slog.Error(err.Error())
-		sendJSON(w, response.Response{Error: err.Error()}, http.StatusBadRequest)
+		response.SendJSON(w, response.Response{Error: err.Error()}, http.StatusBadRequest)
 		return
 	}
 
 	birthDate, err := time.Parse("2006-01-02", client.BirthDate)
 	if err != nil {
-		sendJSON(
+		response.SendJSON(
 			w,
 			*response.ErrorResponse(http.StatusUnprocessableEntity, err.Error()),
 			http.StatusUnprocessableEntity,
@@ -69,7 +51,7 @@ func (h *ClientHandler) CreateClient(w http.ResponseWriter, r *http.Request) {
 	)
 	if err != nil {
 		slog.Error(err.Error())
-		sendJSON(
+		response.SendJSON(
 			w,
 			*response.ErrorResponse(http.StatusUnprocessableEntity, err.Error()),
 			http.StatusUnprocessableEntity,
@@ -79,7 +61,7 @@ func (h *ClientHandler) CreateClient(w http.ResponseWriter, r *http.Request) {
 
 	err = h.ClientRepository.Save(clientInput)
 	if err != nil {
-		sendJSON(
+		response.SendJSON(
 			w,
 			*response.ErrorResponse(http.StatusInternalServerError, err.Error()),
 			http.StatusInternalServerError,
@@ -106,7 +88,7 @@ func (h *ClientHandler) GetClients(w http.ResponseWriter, r *http.Request) {
 
 	clients, err := h.ClientRepository.FindAll(pageInt, limitInt, sort)
 	if err != nil {
-		sendJSON(
+		response.SendJSON(
 			w,
 			*response.ErrorResponse(http.StatusInternalServerError, err.Error()),
 			http.StatusInternalServerError,
@@ -122,7 +104,7 @@ func (h *ClientHandler) GetClients(w http.ResponseWriter, r *http.Request) {
 func (h *ClientHandler) GetClientByID(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	if id == "" {
-		sendJSON(
+		response.SendJSON(
 			w,
 			*response.ErrorResponse(http.StatusBadRequest, ""),
 			http.StatusBadRequest,
@@ -132,7 +114,7 @@ func (h *ClientHandler) GetClientByID(w http.ResponseWriter, r *http.Request) {
 
 	idInt, err := strconv.Atoi(id)
 	if err != nil {
-		sendJSON(
+		response.SendJSON(
 			w,
 			*response.ErrorResponse(http.StatusInternalServerError, err.Error()),
 			http.StatusInternalServerError,
@@ -143,7 +125,7 @@ func (h *ClientHandler) GetClientByID(w http.ResponseWriter, r *http.Request) {
 	client, err := h.ClientRepository.FindByID(idInt)
 	if err != nil {
 		slog.Error(err.Error())
-		sendJSON(
+		response.SendJSON(
 			w,
 			*response.ErrorResponse(http.StatusNotFound, err.Error()),
 			http.StatusNotFound,
@@ -159,7 +141,7 @@ func (h *ClientHandler) GetClientByID(w http.ResponseWriter, r *http.Request) {
 func (h *ClientHandler) UpdateClient(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	if id == "" {
-		sendJSON(
+		response.SendJSON(
 			w,
 			*response.ErrorResponse(http.StatusBadRequest, ""),
 			http.StatusBadRequest,
@@ -169,7 +151,7 @@ func (h *ClientHandler) UpdateClient(w http.ResponseWriter, r *http.Request) {
 
 	idInt, err := strconv.Atoi(id)
 	if err != nil {
-		sendJSON(
+		response.SendJSON(
 			w,
 			*response.ErrorResponse(http.StatusInternalServerError, err.Error()),
 			http.StatusInternalServerError,
@@ -181,7 +163,7 @@ func (h *ClientHandler) UpdateClient(w http.ResponseWriter, r *http.Request) {
 	err = json.NewDecoder(r.Body).Decode(&client)
 	if err != nil {
 		slog.Error(err.Error())
-		sendJSON(
+		response.SendJSON(
 			w,
 			*response.ErrorResponse(http.StatusBadRequest, err.Error()),
 			http.StatusBadRequest,
@@ -191,7 +173,7 @@ func (h *ClientHandler) UpdateClient(w http.ResponseWriter, r *http.Request) {
 
 	birthDate, err := time.Parse("2006-01-02", client.BirthDate)
 	if err != nil {
-		sendJSON(
+		response.SendJSON(
 			w,
 			*response.ErrorResponse(http.StatusBadRequest, err.Error()),
 			http.StatusBadRequest,
@@ -202,7 +184,7 @@ func (h *ClientHandler) UpdateClient(w http.ResponseWriter, r *http.Request) {
 	_, err = h.ClientRepository.FindByID(idInt)
 	if err != nil {
 		slog.Error(err.Error())
-		sendJSON(
+		response.SendJSON(
 			w,
 			*response.ErrorResponse(http.StatusNotFound, err.Error()),
 			http.StatusNotFound,
@@ -222,7 +204,7 @@ func (h *ClientHandler) UpdateClient(w http.ResponseWriter, r *http.Request) {
 	err = h.ClientRepository.Update(&clientInput)
 	if err != nil {
 		slog.Error(err.Error())
-		sendJSON(
+		response.SendJSON(
 			w,
 			*response.ErrorResponse(http.StatusNotFound, err.Error()),
 			http.StatusNotFound,
@@ -236,7 +218,7 @@ func (h *ClientHandler) UpdateClient(w http.ResponseWriter, r *http.Request) {
 func (h *ClientHandler) DeleteProduct(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	if id == "" {
-		sendJSON(
+		response.SendJSON(
 			w,
 			*response.ErrorResponse(http.StatusBadRequest, ""),
 			http.StatusBadRequest,
@@ -246,7 +228,7 @@ func (h *ClientHandler) DeleteProduct(w http.ResponseWriter, r *http.Request) {
 
 	idInt, err := strconv.Atoi(id)
 	if err != nil {
-		sendJSON(
+		response.SendJSON(
 			w,
 			*response.ErrorResponse(http.StatusInternalServerError, err.Error()),
 			http.StatusInternalServerError,
@@ -258,7 +240,7 @@ func (h *ClientHandler) DeleteProduct(w http.ResponseWriter, r *http.Request) {
 	_, err = h.ClientRepository.FindByID(idInt)
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
-		sendJSON(
+		response.SendJSON(
 			w,
 			*response.ErrorResponse(http.StatusNotFound, err.Error()),
 			http.StatusNotFound,
@@ -268,7 +250,7 @@ func (h *ClientHandler) DeleteProduct(w http.ResponseWriter, r *http.Request) {
 
 	err = h.ClientRepository.Delete(idInt)
 	if err != nil {
-		sendJSON(
+		response.SendJSON(
 			w,
 			*response.ErrorResponse(http.StatusInternalServerError, err.Error()),
 			http.StatusInternalServerError,
