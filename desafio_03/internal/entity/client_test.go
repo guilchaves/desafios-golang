@@ -37,7 +37,6 @@ func TestNewClient(t *testing.T) {
 		assert.Equal(t, "name cannot be empty", err.Error())
 	})
 
-	
 	t.Run("future birthdate", func(t *testing.T) {
 		client, err := entity.NewClient("Jane Doe", "09876543210", 4500.0, time.Date(2100, time.January, 1, 0, 0, 0, 0, time.UTC), 1)
 

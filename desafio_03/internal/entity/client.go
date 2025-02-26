@@ -6,7 +6,7 @@ import (
 )
 
 type Client struct {
-	ID        int      `json:"id"`
+	ID        int       `json:"id"`
 	Name      string    `json:"name"`
 	Cpf       string    `json:"cpf"`
 	Income    float64   `json:"income"`

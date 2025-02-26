@@ -47,7 +47,7 @@ func (r *ClientRepository) FindAll(page, limit int, sort string) ([]*entity.Clie
 
 	query := r.Db.Order("id " + sort)
 	if page > 0 && limit > 0 {
-		query = query.Limit(limit).Offset((page -1) * limit)
+		query = query.Limit(limit).Offset((page - 1) * limit)
 	}
 
 	err := query.Find(&clients).Error
