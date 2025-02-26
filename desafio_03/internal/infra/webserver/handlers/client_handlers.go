@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"encoding/json"
-	"log"
 	"log/slog"
 	"net/http"
 	"strconv"
@@ -46,7 +45,7 @@ func (h *ClientHandler) CreateClient(w http.ResponseWriter, r *http.Request) {
 
 	err := json.NewDecoder(r.Body).Decode(&client)
 	if err != nil {
-		log.Print(err)
+		slog.Error(err.Error())
 		sendJSON(w, response.Response{Error: err.Error()}, http.StatusBadRequest)
 		return
 	}
@@ -69,7 +68,7 @@ func (h *ClientHandler) CreateClient(w http.ResponseWriter, r *http.Request) {
 		client.Children,
 	)
 	if err != nil {
-		log.Print(err)
+		slog.Error(err.Error())
 		sendJSON(
 			w,
 			*response.ErrorResponse(http.StatusUnprocessableEntity, err.Error()),
@@ -143,6 +142,7 @@ func (h *ClientHandler) GetClientByID(w http.ResponseWriter, r *http.Request) {
 
 	client, err := h.ClientRepository.FindByID(idInt)
 	if err != nil {
+		slog.Error(err.Error())
 		sendJSON(
 			w,
 			*response.ErrorResponse(http.StatusNotFound, err.Error()),
@@ -180,7 +180,7 @@ func (h *ClientHandler) UpdateClient(w http.ResponseWriter, r *http.Request) {
 	var client dto.UpdateClientInputDTO
 	err = json.NewDecoder(r.Body).Decode(&client)
 	if err != nil {
-		log.Print(err)
+		slog.Error(err.Error())
 		sendJSON(
 			w,
 			*response.ErrorResponse(http.StatusBadRequest, err.Error()),
@@ -201,7 +201,7 @@ func (h *ClientHandler) UpdateClient(w http.ResponseWriter, r *http.Request) {
 
 	_, err = h.ClientRepository.FindByID(idInt)
 	if err != nil {
-		log.Print(err)
+		slog.Error(err.Error())
 		sendJSON(
 			w,
 			*response.ErrorResponse(http.StatusNotFound, err.Error()),
@@ -221,7 +221,7 @@ func (h *ClientHandler) UpdateClient(w http.ResponseWriter, r *http.Request) {
 
 	err = h.ClientRepository.Update(&clientInput)
 	if err != nil {
-		log.Print(err)
+		slog.Error(err.Error())
 		sendJSON(
 			w,
 			*response.ErrorResponse(http.StatusNotFound, err.Error()),
