@@ -29,7 +29,7 @@ func main() {
 	clientRepo := database.NewClientRepository(db)
 	clientHandler := handlers.NewClientHandler(*clientRepo)
 
-	r := chi.NewRouter()
+	r := chi.NewMux()
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 
