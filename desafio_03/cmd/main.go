@@ -6,7 +6,6 @@ import (
 	"os"
 
 	"github.com/guilchaves/desafios-golang/desafio_03/configs"
-	"github.com/guilchaves/desafios-golang/desafio_03/internal/entity"
 	"github.com/guilchaves/desafios-golang/desafio_03/internal/infra/database"
 	"github.com/guilchaves/desafios-golang/desafio_03/internal/infra/webserver/handlers"
 	"github.com/guilchaves/desafios-golang/desafio_03/internal/infra/webserver/routes"
@@ -25,7 +24,6 @@ func main() {
 	}
 
 	db := database.NewDB()
-	db.AutoMigrate(&entity.Client{})
 
 	clientRepo := database.NewClientRepository(db)
 	clientHandler := handlers.NewClientHandler(*clientRepo)
