@@ -3,16 +3,14 @@ package main
 import (
 	"net/http"
 
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
 	"github.com/guilchaves/desafios-golang/desafio_03/configs"
 	"github.com/guilchaves/desafios-golang/desafio_03/internal/entity"
 	"github.com/guilchaves/desafios-golang/desafio_03/internal/infra/database"
 	"github.com/guilchaves/desafios-golang/desafio_03/internal/infra/webserver/handlers"
+	"github.com/guilchaves/desafios-golang/desafio_03/internal/infra/webserver/routes"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
-
 
 func main() {
 	_, err := configs.LoadConfig(".")
@@ -28,16 +26,7 @@ func main() {
 	db.AutoMigrate(&entity.Client{})
 	clientRepo := database.NewClientRepository(db)
 	clientHandler := handlers.NewClientHandler(*clientRepo)
-
-	r := chi.NewMux()
-	r.Use(middleware.Logger)
-	r.Use(middleware.Recoverer)
-
-	r.Get("/clients", clientHandler.GetClients)
-	r.Get("/clients/{id}", clientHandler.GetClientByID)
-	r.Post("/clients", clientHandler.CreateClient)
-	r.Put("/clients/{id}", clientHandler.UpdateClient)
-	r.Delete("/clients/{id}", clientHandler.DeleteProduct)
+	r := routes.NewRouter(clientHandler)
 
 	http.ListenAndServe(":8080", r)
 }
